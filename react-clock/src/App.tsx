@@ -1,22 +1,33 @@
 import logo from './logo.svg'
 import './App.css'
 import useWebSocket from "react-use-websocket";
+import {useEffect, useState} from "react";
+
+const INITIAL_VALUE = "--";
 
 function format(value: number) {
     return String(value).padStart(2, '0')
 }
 
+function updateValue(message: string | undefined, setter: (value: string) => void, extract: (date: Date) => number) {
+    if (message) {
+        const timestamp = new Date(message)
+        setter(format(extract(timestamp)));
+    } else {
+        setter(INITIAL_VALUE)
+    }
+}
+
 function App() {
     const {lastMessage} = useWebSocket('ws://localhost:8001');
-    let hours = "--";
-    let minutes = "--";
-    let seconds = "--";
-    if (lastMessage?.data) {
-        const timestamp = new Date(lastMessage.data)
-        hours = format(timestamp.getHours());
-        minutes = format(timestamp.getMinutes());
-        seconds = format(timestamp.getSeconds());
-    }
+    const [hours, setHours] = useState(INITIAL_VALUE);
+    const [minutes, setMinutes] = useState(INITIAL_VALUE);
+    const [seconds, setSeconds] = useState(INITIAL_VALUE);
+    useEffect(() => {
+        updateValue(lastMessage?.data, setHours, (date: Date) => date.getHours());
+        updateValue(lastMessage?.data, setMinutes, (date: Date) => date.getMinutes());
+        updateValue(lastMessage?.data, setSeconds, (date: Date) => date.getSeconds());
+    }, [lastMessage]);
 
     return (
         <div className="App">
