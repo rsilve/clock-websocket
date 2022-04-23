@@ -9,8 +9,8 @@ async def handler(websocket):
     while True:
         try:
             await asyncio.sleep(1)
-            datetime.now().isoformat()
-            await websocket.send("Hello")
+            timestamp = datetime.now().isoformat()
+            await websocket.send(timestamp)
         except websockets.ConnectionClosedOK:
             break
 
