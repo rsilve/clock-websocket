@@ -13,6 +13,8 @@ async def handler(websocket):
             await websocket.send(timestamp)
         except websockets.ConnectionClosedOK:
             break
+        except websockets.ConnectionClosedError:
+            break
 
 
 async def main():
