@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from lib.handlers import clock_mode_handler, timer_mode_handler, stop_handler, websocket_handler
+from lib.handlers import clock_mode_handler, timer_mode_handler, stop_handler, websocket_handler, history_handler
 from aiohttp import web
 import aiohttp_cors
 
@@ -22,6 +22,7 @@ app.add_routes([
     web.get('/clock', clock_mode_handler),
     web.get('/timer', timer_mode_handler),
     web.get('/stop', stop_handler),
+    web.get('/history', history_handler),
     web.get('/ws', websocket_handler),
 ])
 

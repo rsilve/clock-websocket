@@ -5,6 +5,7 @@ import Actions from "./Actions";
 import useWebSocket from "react-use-websocket";
 import {useEffect, useState} from "react";
 import ModeTitle from "./ModeTitle";
+import WateringHistory from "./WateringHistory";
 
 const SOCKET_URL = 'ws://localhost:8080/ws'
 
@@ -32,7 +33,6 @@ function App() {
         }
     }, [lastJsonMessage]);
 
-
     return (
         <div className="App">
             <header className="App-header">
@@ -44,6 +44,9 @@ function App() {
             </div>
             <div className="App-actions">
                 <Actions mode={mode}/>
+            </div>
+            <div className="App-history">
+                <WateringHistory mode={mode}/>
             </div>
 
         </div>
