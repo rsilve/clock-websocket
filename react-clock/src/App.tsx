@@ -3,7 +3,7 @@ import './App.css'
 import useWebSocket from "react-use-websocket";
 import {useEffect, useState} from "react";
 
-const SOCKET_URL = 'ws://localhost:8001'
+const SOCKET_URL = 'ws://localhost:8080/ws'
 const INITIAL_VALUE = "--";
 
 function format(value: number) {
@@ -20,7 +20,11 @@ function updateValue(message: string | undefined, setter: (value: string) => voi
 }
 
 function App() {
-    const {lastMessage} = useWebSocket(SOCKET_URL);
+    const {lastMessage} = useWebSocket(SOCKET_URL, {
+        shouldReconnect: (_ ) => true,
+            reconnectAttempts: 10,
+            reconnectInterval: 3000,
+    });
     const [hours, setHours] = useState(INITIAL_VALUE);
     const [minutes, setMinutes] = useState(INITIAL_VALUE);
     const [seconds, setSeconds] = useState(INITIAL_VALUE);
