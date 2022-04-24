@@ -1,54 +1,31 @@
 #!/usr/bin/env python
-from datetime import datetime
 
-import asyncio
+from lib.handlers import clock_mode_handler, timer_mode_handler, stop_handler, websocket_handler
 from aiohttp import web
-
-CLIENTS = set()
-TASK = dict()
+import aiohttp_cors
 
 
-async def timer():
-    while True:
-        timestamp = datetime.now().isoformat()
-        for ws in CLIENTS.copy():
-            try:
-                await ws.send_str(timestamp)
-            except ConnectionResetError:
-                CLIENTS.remove(ws)
-                await ws.close()
-        await asyncio.sleep(1)
-
-
-def clear_task(preserved_mode = None):
-    for task in TASK:
-        if task != preserved_mode:
-            TASK[task].cancel()
-            del TASK[task]
-
-
-async def timer_mode(request):
-    clear_task('timer_mode')
-    if 'timer_mode' not in TASK:
-        TASK['timer_mode'] = asyncio.create_task(timer())
-    return web.Response(text="Hello, world")
-
-
-async def websocket_handler(request):
-    ws = web.WebSocketResponse(heartbeat=10)
-    await ws.prepare(request)
-    CLIENTS.add(ws)
-
-    async for _ in ws:
-        await asyncio.Future()
-
-    print('websocket connection closed')
-    return ws
+def configure_cors(application):
+    cors = aiohttp_cors.setup(application, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=False,
+            expose_headers="*",
+            allow_headers="*",
+        )
+    })
+    for route in list(application.router.routes()):
+        cors.add(route)
 
 
 app = web.Application()
-app.add_routes([web.get('/timer', timer_mode)])
-app.add_routes([web.get('/ws', websocket_handler)])
+app.add_routes([
+    web.get('/clock', clock_mode_handler),
+    web.get('/timer', timer_mode_handler),
+    web.get('/stop', stop_handler),
+    web.get('/ws', websocket_handler),
+])
+
+configure_cors(app)
 
 if __name__ == "__main__":
     web.run_app(app)
