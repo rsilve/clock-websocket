@@ -1,31 +1,42 @@
-import {useEffect, useState} from "react";
 import {formatSince} from "./lib/tools";
 
-function formatMode(mode: string) {
-    switch (mode) {
-        case "timer_mode":
-            return "Timed";
-        case "clock_mode":
-            return "Manual";
-        default:
-            return "Unknown";
-    }
+interface WateringHistoryProps {
+    history: { since: string, mode: string, timestamp: string }[];
 }
 
-const WateringHistory = ({mode}: { mode: string }) => {
-    const [history, setHistory] = useState([])
-    useEffect(() => {
-        if (mode === "wait_mode") {
-            fetch("http://localhost:8080/history")
-                .then(res => res.json())
-                .then(data => {
-                    setHistory(data)
-                })
-        }
-    }, [mode]);
-    return (<ul>
-        {history.map((item: { since: string, mode: string, timestamp: string }) => <li
-            key={item.since}>{formatMode(item.mode)} from {formatSince(item.since)} to {formatSince(item.timestamp)}</li>)}
+interface WateringHistoryItemProps {
+    timestamp: string;
+    since: string;
+    mode: string;
+    duration: number;
+}
+
+function prepareHistory(history: { since: string, mode: string, timestamp: string }[]) {
+    const histogram = history.map(value => {
+        const end = new Date(value.timestamp);
+        const start = new Date(value.since);
+        const duration = end.getTime() - start.getTime();
+        return {...value, duration};
+    })
+    const max = histogram.reduce((acc, curr) => {
+        return Math.max(acc, curr.duration);
+    }, 1);
+    return histogram.map(value => {
+        return {...value, duration: value.duration / max};
+    });
+
+}
+
+const WateringHistoryItem = ({ timestamp, since, mode, duration }: WateringHistoryItemProps) => {
+    const style = {width: `${duration*100}%`};
+    return (<li style={style} className={mode}>{formatSince(since)} - {formatSince(timestamp)}</li>)
+}
+
+const WateringHistory = ({history}: WateringHistoryProps) => {
+    const normalizedHistory = prepareHistory(history);
+    return (<ul className="history-graph">
+        {normalizedHistory.map((item: WateringHistoryItemProps) => <WateringHistoryItem
+            key={item.since} {...item}/>)}
     </ul>)
 }
 

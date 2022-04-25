@@ -1,90 +1,17 @@
-import json
-
 import aiohttp
 from aiohttp import web
-from datetime import datetime, timedelta
-import asyncio
-from collections import deque
-
-from lib.models import Payload
-
-CLIENTS = set()
-TASK = dict()
-HISTORY = deque(maxlen=10)
+from lib.tasks import CLIENTS, clear_task, send_wait_payload, HISTORY, create_task
 
 
-async def send_wait_payload():
-    payload = Payload('wait_mode', None, -1, None)
-    for ws in CLIENTS.copy():
-        try:
-            await ws.send_str(json.dumps(payload.to_dict()))
-        except ConnectionResetError:
-            CLIENTS.remove(ws)
-            await ws.close()
-
-
-async def timer():
-    start = datetime.now()
-    try:
-        current = start
-        end = current + timedelta(seconds=60)
-        while current < end:
-            current = datetime.now()
-            payload = Payload('timer_mode', current.isoformat(), -1, start.isoformat())
-            payload_str = json.dumps(payload.to_dict())
-            for ws in CLIENTS.copy():
-                try:
-                    await ws.send_str(payload_str)
-                except ConnectionResetError:
-                    CLIENTS.remove(ws)
-                    await ws.close()
-            await asyncio.sleep(1)
-        HISTORY.appendleft(Payload('timer_mode', current.isoformat(), -1, start.isoformat()))
-        await send_wait_payload()
-    except asyncio.CancelledError:
-        HISTORY.appendleft(Payload('timer_mode', datetime.now().isoformat(), -1, start.isoformat()))
-        raise
-
-
-async def clock():
-    start = datetime.now()
-    try:
-        while True:
-            timestamp = datetime.now().isoformat()
-            payload = Payload('clock_mode', timestamp, -1, start.isoformat())
-            payload_str = json.dumps(payload.to_dict())
-            for ws in CLIENTS.copy():
-                try:
-                    await ws.send_str(payload_str)
-                except ConnectionResetError:
-                    CLIENTS.remove(ws)
-                    await ws.close()
-            await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        HISTORY.appendleft(Payload('clock_mode', datetime.now().isoformat(), -1, start.isoformat()))
-        raise
-
-
-def clear_task(preserved_mode=None):
-    for task in TASK.copy():
-        if task != preserved_mode:
-            TASK[task].cancel()
-            del TASK[task]
-
-
-async def clock_mode_handler(_):
-    mode = 'clock_mode'
-    clear_task(mode)
-    if mode not in TASK:
-        TASK[mode] = asyncio.create_task(clock())
+async def manual_mode_handler(_):
+    mode = 'manual_mode'
+    create_task(mode)
     return web.Response(text="clock mode starter")
 
 
 def timer_mode_handler(_):
     mode = 'timer_mode'
-    clear_task(mode)
-    if mode not in TASK:
-        TASK[mode] = asyncio.create_task(timer())
+    create_task(mode, preserved_mode='manual_mode')
     return web.Response(text="timer mode starter")
 
 

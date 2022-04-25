@@ -13,6 +13,7 @@ function App() {
     const [mode, setMode] = useState('wait_mode')
     const [timestamp, setTimestamp] = useState(undefined as string | undefined)
     const [since, setSince] = useState(undefined as string | undefined)
+    const [history, setHistory] = useState([])
     const {lastJsonMessage} = useWebSocket(SOCKET_URL, {
         shouldReconnect: (_) => true,
         reconnectAttempts: 1000,
@@ -33,20 +34,27 @@ function App() {
         }
     }, [lastJsonMessage]);
 
+    useEffect(() => {
+        fetch("http://localhost:8080/history")
+            .then(res => res.json())
+            .then(data => {
+                setHistory(data)
+            })
+    }, [mode]);
     return (
         <div className="App">
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo"/>
             </header>
             <div className="App-body">
-                <ModeTitle mode={mode} since={since}/>
+                <ModeTitle mode={mode} since={since} timestamp={timestamp}/>
                 <Clock timestamp={timestamp}/>
             </div>
             <div className="App-actions">
                 <Actions mode={mode}/>
             </div>
             <div className="App-history">
-                <WateringHistory mode={mode}/>
+                <WateringHistory history={history}/>
             </div>
 
         </div>
