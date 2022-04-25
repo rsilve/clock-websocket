@@ -10,14 +10,19 @@ TASK = dict()
 HISTORY = deque(maxlen=10)
 
 
-async def send_wait_payload():
-    payload = Payload('wait_mode', None, -1, None)
+async def ws_send_str(payload_str):
     for ws in CLIENTS.copy():
         try:
-            await ws.send_str(json.dumps(payload.to_dict()))
+            await ws.send_str(payload_str)
         except ConnectionResetError:
             CLIENTS.remove(ws)
             await ws.close()
+
+
+async def send_wait_payload():
+    payload = Payload('wait_mode', None, None)
+    payload_str = json.dumps(payload.to_dict())
+    await ws_send_str(payload_str)
 
 
 async def timer():
@@ -26,20 +31,15 @@ async def timer():
         current = start
         end = current + timedelta(seconds=60)
         while current < end:
-            current = datetime.now()
-            payload = Payload('timer_mode', current.isoformat(), -1, start.isoformat())
+            payload = Payload('timer_mode', current.isoformat(), start.isoformat(), end.isoformat())
             payload_str = json.dumps(payload.to_dict())
-            for ws in CLIENTS.copy():
-                try:
-                    await ws.send_str(payload_str)
-                except ConnectionResetError:
-                    CLIENTS.remove(ws)
-                    await ws.close()
+            await ws_send_str(payload_str)
             await asyncio.sleep(1)
-        HISTORY.appendleft(Payload('timer_mode', current.isoformat(), -1, start.isoformat()))
+            current = datetime.now()
+        HISTORY.appendleft(Payload('timer_mode', current.isoformat(), start.isoformat(), end.isoformat()))
         await send_wait_payload()
     except asyncio.CancelledError:
-        HISTORY.appendleft(Payload('timer_mode', datetime.now().isoformat(), -1, start.isoformat()))
+        HISTORY.appendleft(Payload('timer_mode', datetime.now().isoformat(), start.isoformat()))
         raise
 
 
@@ -48,17 +48,12 @@ async def manual():
     try:
         while True:
             timestamp = datetime.now().isoformat()
-            payload = Payload('manual_mode', timestamp, -1, start.isoformat())
+            payload = Payload('manual_mode', timestamp, start.isoformat())
             payload_str = json.dumps(payload.to_dict())
-            for ws in CLIENTS.copy():
-                try:
-                    await ws.send_str(payload_str)
-                except ConnectionResetError:
-                    CLIENTS.remove(ws)
-                    await ws.close()
+            await ws_send_str(payload_str)
             await asyncio.sleep(1)
     except asyncio.CancelledError:
-        HISTORY.appendleft(Payload('manual_mode', datetime.now().isoformat(), -1, start.isoformat()))
+        HISTORY.appendleft(Payload('manual_mode', datetime.now().isoformat(), start.isoformat()))
         raise
 
 
@@ -79,4 +74,3 @@ def create_task(mode, preserved_mode=None):
             'timer_mode': timer,
         }[mode]
         TASK[mode] = asyncio.create_task(coroutine())
-

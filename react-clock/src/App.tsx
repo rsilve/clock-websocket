@@ -13,6 +13,7 @@ function App() {
     const [mode, setMode] = useState('wait_mode')
     const [timestamp, setTimestamp] = useState(undefined as string | undefined)
     const [since, setSince] = useState(undefined as string | undefined)
+    const [to, setTo] = useState(undefined as string | undefined)
     const [history, setHistory] = useState([])
     const {lastJsonMessage} = useWebSocket(SOCKET_URL, {
         shouldReconnect: (_) => true,
@@ -31,6 +32,9 @@ function App() {
             if (lastJsonMessage.since !== since) {
                 setSince(lastJsonMessage.since)
             }
+            if (lastJsonMessage.to !== to) {
+                setTo(lastJsonMessage.to)
+            }
         }
     }, [lastJsonMessage]);
 
@@ -47,7 +51,7 @@ function App() {
                 <img src={logo} className="App-logo" alt="logo"/>
             </header>
             <div className="App-body">
-                <ModeTitle mode={mode} since={since} timestamp={timestamp}/>
+                <ModeTitle mode={mode} since={since} timestamp={timestamp} to={to}/>
                 <Clock timestamp={timestamp}/>
             </div>
             <div className="App-actions">

@@ -1,12 +1,13 @@
-import {elapsed, formatSince, remain} from "./lib/tools";
+import {elapsed, formatSince} from "./lib/tools";
 
 interface ModeTitleProps {
     mode: string;
     since?: string;
     timestamp?: string;
+    to?: string;
 }
 
-const ModeTitle = ({mode, since, timestamp}: ModeTitleProps) => {
+const ModeTitle = ({mode, since, timestamp, to}: ModeTitleProps) => {
     return (<div>
         {mode === 'manual_mode' && 'Manual Watering'}
         {mode === 'timer_mode' && 'Timed Watering'}
@@ -15,7 +16,7 @@ const ModeTitle = ({mode, since, timestamp}: ModeTitleProps) => {
         {since && `since ${formatSince(since, '')}`}
         &nbsp;
         {mode === 'manual_mode' && `elapsed ${elapsed(since, timestamp)}`}
-        {mode === 'timer_mode' && `remaining ${remain(since, timestamp)}`}
+        {mode === 'timer_mode' && `remaining ${elapsed(timestamp, to)}`}
     </div>)
 }
 
