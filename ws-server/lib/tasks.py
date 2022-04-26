@@ -4,19 +4,10 @@ from datetime import datetime, timedelta
 
 import asyncio
 from lib.models import Payload
+from lib.ws import broadcast
 
-CLIENTS = set()
 TASK = dict()
 HISTORY = deque(maxlen=10)
-
-
-async def broadcast(payload_str):
-    for ws in CLIENTS.copy():
-        try:
-            await ws.send_str(payload_str)
-        except ConnectionResetError:
-            CLIENTS.remove(ws)
-            await ws.close()
 
 
 async def send_wait_payload():
@@ -37,10 +28,10 @@ async def timer():
             await asyncio.sleep(1)
             current = datetime.now()
         HISTORY.appendleft(Payload('timer_mode', current.isoformat(), start.isoformat(), end.isoformat()))
-        await send_wait_payload()
     except asyncio.CancelledError:
         HISTORY.appendleft(Payload('timer_mode', datetime.now().isoformat(), start.isoformat()))
         raise
+    await wait()
 
 
 async def manual():
@@ -58,20 +49,15 @@ async def manual():
 
 
 async def wait():
-    start = datetime.now()
-    try:
-        while True:
-            timestamp = datetime.now().isoformat()
-            payload = Payload('wait_mode', timestamp, start.isoformat())
-            payload_str = json.dumps(payload.to_dict())
-            await broadcast(payload_str)
-            await asyncio.sleep(1)
-    except asyncio.CancelledError:
-        HISTORY.appendleft(Payload('wait_mode', datetime.now().isoformat(), start.isoformat()))
-        raise
+    while True:
+        timestamp = datetime.now().isoformat()
+        payload = Payload('wait_mode', timestamp, None)
+        payload_str = json.dumps(payload.to_dict())
+        await broadcast(payload_str)
+        await asyncio.sleep(1)
 
 
-async def clear_task(current_mode=None, preserved_mode=None):
+def clear_task(current_mode=None, preserved_mode=None):
     for task in TASK.copy():
         if task != current_mode and task != preserved_mode:
             TASK[task].cancel()
@@ -86,5 +72,6 @@ def create_task(mode, preserved_mode=None):
         coroutine = {
             'manual_mode': manual,
             'timer_mode': timer,
+            'wait_mode': wait,
         }[mode]
         TASK[mode] = asyncio.create_task(coroutine())

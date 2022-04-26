@@ -1,23 +1,24 @@
 import aiohttp
 from aiohttp import web
-from lib.tasks import CLIENTS, clear_task, send_wait_payload, HISTORY, create_task
+from lib.tasks import clear_task, send_wait_payload, HISTORY, create_task
+from lib.ws import add_client, remove_client
 
 
-async def manual_mode_handler(_):
+def manual_mode_handler(_):
     mode = 'manual_mode'
-    await create_task(mode)
+    create_task(mode)
     return web.Response(text="clock mode starter")
 
 
-async def timer_mode_handler(_):
+def timer_mode_handler(_):
     mode = 'timer_mode'
-    await create_task(mode, preserved_mode='manual_mode')
+    create_task(mode, preserved_mode='manual_mode')
     return web.Response(text="timer mode starter")
 
 
-async def stop_handler(_):
+def stop_handler(_):
     clear_task()
-    await send_wait_payload()
+    create_task('wait_mode')
     return web.Response(text='stop')
 
 
@@ -28,14 +29,17 @@ def history_handler(_):
 async def websocket_handler(request):
     ws = web.WebSocketResponse(heartbeat=10)
     await ws.prepare(request)
-    CLIENTS.add(ws)
-    async for msg in ws:
-        if msg.type == aiohttp.WSMsgType.TEXT:
-            if msg.data == 'close':
-                await ws.close()
-        elif msg.type == aiohttp.WSMsgType.ERROR:
-            print('ws connection closed with exception %s' %
-                  ws.exception())
+    add_client(ws)
+    try:
+        async for msg in ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                if msg.data == 'close':
+                    await ws.close()
+            elif msg.type == aiohttp.WSMsgType.ERROR:
+                print('ws connection closed with exception %s' %
+                      ws.exception())
+    finally:
+        remove_client(ws)
 
     print('websocket connection closed')
     return ws
