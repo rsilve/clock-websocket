@@ -1,26 +1,32 @@
 #!/usr/bin/env python
 
-import asyncio
-import websockets
-from datetime import datetime
+from lib.handlers import manual_mode_handler, timer_mode_handler, stop_handler, websocket_handler, history_handler
+from aiohttp import web
+import aiohttp_cors
 
 
-async def handler(websocket):
-    while True:
-        try:
-            await asyncio.sleep(1)
-            timestamp = datetime.now().isoformat()
-            await websocket.send(timestamp)
-        except websockets.ConnectionClosedOK:
-            break
-        except websockets.ConnectionClosedError:
-            break
+def configure_cors(application):
+    cors = aiohttp_cors.setup(application, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=False,
+            expose_headers="*",
+            allow_headers="*",
+        )
+    })
+    for route in list(application.router.routes()):
+        cors.add(route)
 
 
-async def main():
-    async with websockets.serve(handler, "", 8001):
-        await asyncio.Future()  # run forever
+app = web.Application()
+app.add_routes([
+    web.get('/manual', manual_mode_handler),
+    web.get('/timer', timer_mode_handler),
+    web.get('/stop', stop_handler),
+    web.get('/history', history_handler),
+    web.get('/ws', websocket_handler),
+])
 
+configure_cors(app)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    web.run_app(app)
