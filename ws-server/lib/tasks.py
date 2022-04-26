@@ -10,7 +10,7 @@ TASK = dict()
 HISTORY = deque(maxlen=10)
 
 
-async def ws_send_str(payload_str):
+async def broadcast(payload_str):
     for ws in CLIENTS.copy():
         try:
             await ws.send_str(payload_str)
@@ -22,18 +22,18 @@ async def ws_send_str(payload_str):
 async def send_wait_payload():
     payload = Payload('wait_mode', None, None)
     payload_str = json.dumps(payload.to_dict())
-    await ws_send_str(payload_str)
+    await broadcast(payload_str)
 
 
 async def timer():
     start = datetime.now()
     try:
         current = start
-        end = current + timedelta(seconds=60)
+        end = current + timedelta(seconds=10)
         while current < end:
             payload = Payload('timer_mode', current.isoformat(), start.isoformat(), end.isoformat())
             payload_str = json.dumps(payload.to_dict())
-            await ws_send_str(payload_str)
+            await broadcast(payload_str)
             await asyncio.sleep(1)
             current = datetime.now()
         HISTORY.appendleft(Payload('timer_mode', current.isoformat(), start.isoformat(), end.isoformat()))
@@ -50,14 +50,28 @@ async def manual():
             timestamp = datetime.now().isoformat()
             payload = Payload('manual_mode', timestamp, start.isoformat())
             payload_str = json.dumps(payload.to_dict())
-            await ws_send_str(payload_str)
+            await broadcast(payload_str)
             await asyncio.sleep(1)
     except asyncio.CancelledError:
         HISTORY.appendleft(Payload('manual_mode', datetime.now().isoformat(), start.isoformat()))
         raise
 
 
-def clear_task(current_mode=None, preserved_mode=None):
+async def wait():
+    start = datetime.now()
+    try:
+        while True:
+            timestamp = datetime.now().isoformat()
+            payload = Payload('wait_mode', timestamp, start.isoformat())
+            payload_str = json.dumps(payload.to_dict())
+            await broadcast(payload_str)
+            await asyncio.sleep(1)
+    except asyncio.CancelledError:
+        HISTORY.appendleft(Payload('wait_mode', datetime.now().isoformat(), start.isoformat()))
+        raise
+
+
+async def clear_task(current_mode=None, preserved_mode=None):
     for task in TASK.copy():
         if task != current_mode and task != preserved_mode:
             TASK[task].cancel()

@@ -5,13 +5,13 @@ from lib.tasks import CLIENTS, clear_task, send_wait_payload, HISTORY, create_ta
 
 async def manual_mode_handler(_):
     mode = 'manual_mode'
-    create_task(mode)
+    await create_task(mode)
     return web.Response(text="clock mode starter")
 
 
-def timer_mode_handler(_):
+async def timer_mode_handler(_):
     mode = 'timer_mode'
-    create_task(mode, preserved_mode='manual_mode')
+    await create_task(mode, preserved_mode='manual_mode')
     return web.Response(text="timer mode starter")
 
 
