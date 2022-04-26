@@ -50,7 +50,7 @@
 
 .clock {
     font-family: monospace;
-    font-size: 15vmin;
+    font-size: 3vmin;
 }
 
 ul {
@@ -90,4 +90,9 @@ button {
 
 .history-graph > li.manual_mode {
     border-bottom: 4px solid red;
+}
+
+.mode-report {
+    font-size: 5vmin;
+    padding: 2vmin;
 }

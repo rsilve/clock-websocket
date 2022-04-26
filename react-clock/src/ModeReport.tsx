@@ -1,23 +1,23 @@
 import {elapsed, formatSince} from "./lib/tools";
 
-interface ModeTitleProps {
+interface ModeReportProps {
     mode: string;
     since?: string;
     timestamp?: string;
     to?: string;
 }
 
-const ModeTitle = ({mode, since, timestamp, to}: ModeTitleProps) => {
-    return (<div>
+const ModeReport = ({mode, since, timestamp, to}: ModeReportProps) => {
+    return (<div className="mode-report">
         {mode === 'manual_mode' && 'Manual Watering'}
         {mode === 'timer_mode' && 'Timed Watering'}
         {mode === 'wait_mode' && 'Choose a watering mode'}
-        &nbsp;
+        <br/>
         {since && `since ${formatSince(since, '')}`}
-        &nbsp;
+        <br/>
         {mode === 'manual_mode' && `elapsed ${elapsed(since, timestamp)}`}
         {mode === 'timer_mode' && `remaining ${elapsed(timestamp, to)}`}
     </div>)
 }
 
-export default ModeTitle
+export default ModeReport;

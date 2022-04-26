@@ -4,7 +4,7 @@ import Clock from "./Clock";
 import Actions from "./Actions";
 import useWebSocket from "react-use-websocket";
 import {useEffect, useState} from "react";
-import ModeTitle from "./ModeTitle";
+import ModeReport from "./ModeReport";
 import WateringHistory from "./WateringHistory";
 
 const SOCKET_URL = 'ws://localhost:8080/ws'
@@ -51,8 +51,8 @@ function App() {
                 <img src={logo} className="App-logo" alt="logo"/>
             </header>
             <div className="App-body">
-                <ModeTitle mode={mode} since={since} timestamp={timestamp} to={to}/>
                 <Clock timestamp={timestamp}/>
+                <ModeReport mode={mode} since={since} timestamp={timestamp} to={to}/>
             </div>
             <div className="App-actions">
                 <Actions mode={mode}/>
