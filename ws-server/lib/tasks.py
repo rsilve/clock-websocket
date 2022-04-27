@@ -1,6 +1,7 @@
 import json
 from collections import deque
 from datetime import datetime, timedelta
+from random import randrange
 
 import asyncio
 from lib.models import Payload
@@ -31,7 +32,7 @@ async def timer():
     except asyncio.CancelledError:
         HISTORY.appendleft(Payload('timer_mode', datetime.now().isoformat(), start.isoformat()))
         raise
-    await wait()
+    create_task('wait_mode', preserved_mode='manual_mode')
 
 
 async def manual():
@@ -78,6 +79,10 @@ def create_task(mode, preserved_mode=None):
 
 
 def simulation():
-    while True:
-        TASK['simulation'] = asyncio.create_task(timer())
-        await asyncio.sleep(15)
+    async def coro():
+        while True:
+            await asyncio.sleep(20 + randrange(10))
+            create_task('timer_mode', preserved_mode='manual_mode')
+
+    TASK['simulation'] = asyncio.create_task(coro())
+

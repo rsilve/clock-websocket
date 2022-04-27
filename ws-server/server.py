@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib.tasks import create_task, clear_task
+from lib.tasks import create_task, simulation
 from lib.handlers import manual_mode_handler, timer_mode_handler, stop_handler, websocket_handler, history_handler
 from lib.ws import close_all_clients
 from aiohttp import web
@@ -20,6 +20,7 @@ def configure_cors(application):
 
 async def on_startup(_):
     create_task('wait_mode')
+    simulation()
 
 
 async def on_shutdown(_):

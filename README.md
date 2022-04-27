@@ -3,16 +3,19 @@
 ## Pitch
 
 L'idée de base tourne autour d'un système d'aspersion automatique. Des capteurs remontent
-des data à un système qui après va déclencher l'irrigation. L'utilisateur peut voir les infos sur une page web dédiés.
+des data à un système qui va controler l'irrigation. L'utilisateur a accès à une console web dédié pour le suivit et la gestion.
 
-Pour l'exemple, on se contrentre sur la fonctionnalité suivante : 
-Un horloge sur laquelle on peut voir l'etat du système (en cours de fonctionnement ou pas) et sur laquelle on 
+Pour l'exemple, on se concentre sur la fonctionnalité suivante : 
+Un écran sur lequelle on peut voir l'état du système (en cours de fonctionement ou pas) et sur laquelle on 
 peut voir l'historique de fonctionnement (les 10 dernières actions).
+La console contient un horloge afin d'apprécier correctement les déclenchements de l'irrigation.
+Les données temporelle sont envoyées par le serveur pour permettre de gérer le cas
+d'un système on premise non connecté sur internet pour lequel on ne maîtrise pas la synchronisation horaire.
 
 L'utilisateur peut controler le déclenchement via deux actions : 
  - un timer de X seconds (10 pour l'exemple)
  - um mode manuel avec durée indéfinie
-Dans tout les cas il peut stopper l'actions en cours ou forcer le mode manuel
+Dans tout les cas il peut stopper l'action en cours ou forcer le mode manuel
 
 Les données transmises au client via push websocket sont : 
  - le timestamp courant (pas de notion de timezone - timestamp local)
@@ -27,6 +30,8 @@ les changements de mode sont pilotés par HTTP via les endpoint
  - `GET /timer`
  - `GET /stop`
 
+Le système de controle automatique passe par ces endpoints pour lancer l'irrigation en mode timer lorsque c'est nécessaire.
+
 L'historique est récupéré via HTTP sur le endpoint `GET /history`
 
 ## Technique
@@ -37,7 +42,10 @@ Pour le lancement du projet un Makefile est utilisé pour centraliser les 4 comm
 La partie backend python s'appuie sur python3 et sur `aiohttp` pour implémenter un simple serveur HTTP + Websocket.
 Pour simplifier le dev, un module CORS est présent et configurer pour accepter tous les clients.
 
-La partie client s'appuie sur un projet React instrumenter par ViteJS. 
+La partie client s'appuie sur un projet React instrumenté par ViteJS. 
+
+Pour l'exemple le système de contrôle est simulé direct au sein du backen python par une fonction `simulation` qui déclecnhe 
+de manière plus ou moins aléatoire le mode timer.
 
 
 ## Improvement
@@ -46,15 +54,16 @@ Persistence de l'historique : pour l'exemple l'historique n'est pas persisté. U
 permettrait d'être un peu plus propre.
 
 Meilleur gestion des données transmise : l'objectif du websocket est de transmettre les infos d'état (mode, début et/ou fin) ET 
-de transmettre l'info d'horloge (pour assurer que les données temporelle sont cohérentes - prendre l'exemple d'un système on premise non connecté sur internet pour lequel on ne maîtrise pas la synchronisation horaire). Dans l'exemple toutes les données sont tout le temps transmise.
+de transmettre l'info d'horloge. Dans l'exemple toutes les données sont tout le temps transmise.
 Il serait judicieux d'avoir des transmissions différentes pour ne transmettre que l'info qui change au moment ou elle change.
 
-Prévoir un support multi-système : pour l'exemple tout les devices se connecte sur le même channel et gère le même état.
+Un support multi-système : pour l'exemple tout les devices (système de contrôle et utilisateur) se connecte sur le même channel et 
+gère le même état.
 Il faudrait rajouter un support multi channel (peut-etre socketIO qui intègre plus nativement ce type de mécanisme mais je ne suis pas convaincu). 
 
 Améliorer le broadcast : pour l'exemple le système de broadcast est fait de manière assez naive, ce qui pose très certainement des soucis de scaling.
 
-
+Un mock du système de controle externe plus représentatif.
 
 ## WS Server
 
