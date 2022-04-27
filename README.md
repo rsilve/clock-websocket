@@ -29,6 +29,15 @@ les changements de mode sont pilotés par HTTP via les endpoint
 
 L'historique est récupéré via HTTP sur le endpoint `GET /history`
 
+## Technique
+
+Le projet est un monorepo avec le backend python `ws-server` et le client react `react-clock`.
+Pour le lancement du projet un Makefile est utilisé pour centraliser les 4 commandes utiles dans le cadre de l'exemple.
+
+La partie backend python s'appuie sur python3 et sur `aiohttp` pour implémenter un simple serveur HTTP + Websocket.
+Pour simplifier le dev, un module CORS est présent et configurer pour accepter tous les clients.
+
+La partie client s'appuie sur un projet React instrumenter par ViteJS. 
 
 
 ## Improvement
@@ -43,7 +52,7 @@ Il serait judicieux d'avoir des transmissions différentes pour ne transmettre q
 Prévoir un support multi-système : pour l'exemple tout les devices se connecte sur le même channel et gère le même état.
 Il faudrait rajouter un support multi channel (peut-etre socketIO qui intègre plus nativement ce type de mécanisme mais je ne suis pas convaincu). 
 
-Améliorer le broadcast : pour l'exemple le système de broadcast est fait de manière assez naive, ce qui pose probablement des soucis de scaling.
+Améliorer le broadcast : pour l'exemple le système de broadcast est fait de manière assez naive, ce qui pose très certainement des soucis de scaling.
 
 
 
