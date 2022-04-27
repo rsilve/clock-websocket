@@ -13,7 +13,6 @@ const Actions = ({mode}: { mode: string }) => {
     const stop = async () => {
         await fetch(stopUrl)
     }
-
     return (<>
         {mode === 'wait_mode' && <button onClick={manual_mode}>Manual watering</button>}
         {mode === 'wait_mode' && <button onClick={timer_mode}>Timed watering</button>}

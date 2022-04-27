@@ -1,15 +1,15 @@
 import {formatSince} from "./lib/tools";
+import {useEffect, useState} from "react";
 
-interface WateringHistoryProps {
-    history: { since: string, mode: string, timestamp: string }[];
-}
-
-interface WateringHistoryItemProps {
+type WateringHistoryItemProps = {
     timestamp: string;
     since: string;
     mode: string;
     duration: number;
 }
+type WateringHistoryType = WateringHistoryItemProps[]
+
+
 
 function prepareHistory(history: { since: string, mode: string, timestamp: string }[]) {
     const histogram = history.map(value => {
@@ -27,15 +27,23 @@ function prepareHistory(history: { since: string, mode: string, timestamp: strin
 
 }
 
-const WateringHistoryItem = ({ timestamp, since, mode, duration }: WateringHistoryItemProps) => {
-    const style = {width: `${duration*100}%`};
+const WateringHistoryItem = ({timestamp, since, mode, duration}: WateringHistoryItemProps) => {
+    const style = {width: `${duration * 100}%`};
     return (<li style={style} className={mode}>{formatSince(since)} - {formatSince(timestamp)}</li>)
 }
 
-const WateringHistory = ({history}: WateringHistoryProps) => {
-    const normalizedHistory = prepareHistory(history);
+const WateringHistory = ({mode}: { mode: string }) => {
+    const [history, setHistory] = useState([] as WateringHistoryType);
+    useEffect(() => {
+        fetch("http://localhost:8080/history")
+            .then(res => res.json())
+            .then(data => {
+                setHistory(prepareHistory(data))
+            })
+    }, [mode]);
+
     return (<ul className="history-graph">
-        {normalizedHistory.map((item: WateringHistoryItemProps) => <WateringHistoryItem
+        {history.map((item: WateringHistoryItemProps) => <WateringHistoryItem
             key={item.since} {...item}/>)}
     </ul>)
 }

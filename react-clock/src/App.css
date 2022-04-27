@@ -96,3 +96,7 @@ button {
     font-size: 5vmin;
     padding: 2vmin;
 }
+
+.timestamp {
+    font-family: monospace;
+}
