@@ -7,6 +7,10 @@ interface ModeReportProps {
     to?: string;
 }
 
+const TimeStamp = ({timestamp}: {timestamp: string}) => {
+    return <span className="timestamp">{timestamp}</span>;
+};
+
 const ModeReport = ({mode, since, timestamp, to}: ModeReportProps) => {
     return (<div className="mode-report">
         {mode === 'manual_mode' && 'Manual Watering'}
