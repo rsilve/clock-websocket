@@ -59,7 +59,7 @@ async def wait():
 
 def clear_task(current_mode=None, preserved_mode=None):
     for task in TASK.copy():
-        if task != current_mode and task != preserved_mode:
+        if task != current_mode and task != preserved_mode and task != 'simulation':
             TASK[task].cancel()
             del TASK[task]
 
@@ -75,3 +75,9 @@ def create_task(mode, preserved_mode=None):
             'wait_mode': wait,
         }[mode]
         TASK[mode] = asyncio.create_task(coroutine())
+
+
+def simulation():
+    while True:
+        TASK['simulation'] = asyncio.create_task(timer())
+        await asyncio.sleep(15)
