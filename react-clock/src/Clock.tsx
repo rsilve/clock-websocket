@@ -3,7 +3,7 @@ import useWebSocket from "react-use-websocket";
 import { useContext, useEffect, useState } from "react";
 import AppDispatch from "./AppDispatch";
 
-const SOCKET_URL = __APP_BACKEND__
+const SOCKET_URL = __APP_BACKEND__ + "/ws";
 
 const Clock = () => {
     const dispatch = useContext(AppDispatch)
