@@ -57,6 +57,9 @@ de manière plus ou moins aléatoire le mode timer.
 
 Des TU.
 
+Préparation du projet pour le déploiement : actuellement le projet n'est pas déployable directement. Il manque une gestion de
+configuration afin de build un livrable deployable.
+
 Persistence de l'historique : pour l'exemple l'historique n'est pas persisté. Un minimum de persistence sur un support simple comme REDIS
 permettrait d'être un peu plus propre.
 
