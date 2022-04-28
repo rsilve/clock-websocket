@@ -12,6 +12,8 @@ La console contient un horloge afin d'apprécier correctement les déclenchement
 Les données temporelle sont envoyées par le serveur pour permettre de gérer le cas
 d'un système on premise non connecté sur internet pour lequel on ne maîtrise pas la synchronisation horaire.
 
+![](screenshot.jpg)
+
 L'utilisateur peut contrôler le déclenchement via deux actions :
 - un timer de X seconds (10 pour l'exemple)
 - un mode manuel avec durée indéfinie
