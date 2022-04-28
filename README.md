@@ -34,6 +34,8 @@ Le système de controle automatique passe par ces endpoints pour lancer l'irriga
 
 L'historique est récupéré via HTTP sur le endpoint `GET /history`
 
+![](schema.png)
+
 ## Technique
 
 Le projet est un monorepo avec le backend python `ws-server` et le client react `react-clock`.
@@ -42,6 +44,7 @@ Pour le lancement du projet un Makefile est utilisé pour centraliser les 4 comm
 
 La partie backend python s'appuie sur python3 et sur `aiohttp` pour implémenter un simple serveur HTTP + Websocket.
 Pour simplifier le dev, un module CORS est présent et configurer pour accepter tous les clients.
+La génération des données horaires qui sont broadcast via le websocket est réalisé au travers de tâches asyncio.
 
 La partie client s'appuie sur un projet React instrumenté par ViteJS. La connection au websocket est prise en charge via 
 le module `react-use-websocket` et le hook `useWebsocket` qui permet de gérer la connection et la réception des messages.
