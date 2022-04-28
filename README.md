@@ -37,18 +37,22 @@ L'historique est récupéré via HTTP sur le endpoint `GET /history`
 ## Technique
 
 Le projet est un monorepo avec le backend python `ws-server` et le client react `react-clock`.
-Pour le lancement du projet un Makefile est utilisé pour centraliser les 4 commandes utiles dans le cadre de l'exemple.
+Pour le lancement du projet un Makefile est utilisé pour centraliser les 4 commandes utiles dans le cadre de l'exemple
+(voir à la fin du document pour les commandes disponibles).
 
 La partie backend python s'appuie sur python3 et sur `aiohttp` pour implémenter un simple serveur HTTP + Websocket.
 Pour simplifier le dev, un module CORS est présent et configurer pour accepter tous les clients.
 
-La partie client s'appuie sur un projet React instrumenté par ViteJS.
+La partie client s'appuie sur un projet React instrumenté par ViteJS. La connection au websocket est prise en charge via 
+le module `react-use-websocket` et le hook `useWebsocket` qui permet de gérer la connection et la réception des messages.
 
 Pour l'exemple le système de contrôle est simulé direct au sein du backend python par une fonction `simulation` qui déclenche
 de manière plus ou moins aléatoire le mode timer.
 
 
 ## Improvement
+
+Des TU.
 
 Persistence de l'historique : pour l'exemple l'historique n'est pas persisté. Un minimum de persistence sur un support simple comme REDIS
 permettrait d'être un peu plus propre.
